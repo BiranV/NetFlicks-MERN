@@ -29,6 +29,7 @@ const Auth = () => {
 
     const userSignIn = (e) => {
         e.preventDefault();
+
         signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
             navigate("/");
         }).catch((error) => {
@@ -39,9 +40,9 @@ const Auth = () => {
 
     const userSignUp = (e) => {
         e.preventDefault();
+
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                console.log(userCredential)
                 navigate("/")
             }).catch((error) => {
                 console.log(error)

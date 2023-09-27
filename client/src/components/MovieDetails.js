@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "../firebase"
+import { auth, storage } from "../firebase"
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
 import axios from "../api/axios"
 import Snackbar from './Snackbar';
+import { v4 } from "uuid"
 
 const MovieDetails = () => {
     const navigate = useNavigate();
     let { id } = useParams();
     const [authUser, setAuthUser] = useState(null);
+    const [imageUpload, setImageUpload] = useState(null);
     const [form, setForm] = useState({})
     const [editedForm, setEditedForm] = useState({})
     const [notFound, setNotFound] = useState(false);
@@ -47,46 +50,6 @@ const MovieDetails = () => {
         return () => listen()
     }, [])
 
-    const uploadMovie = (e) => {
-        const selectedFile = e.target.files[0];
-        const maxWidth = 800;
-        const maxHeight = 600;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const image = new Image();
-            image.src = event.target.result;
-
-            image.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-
-                let newWidth = image.width;
-                let newHeight = image.height;
-
-                // Calculate new dimensions while maintaining aspect ratio
-                if (newWidth > maxWidth) {
-                    const ratio = maxWidth / newWidth;
-                    newWidth = maxWidth;
-                    newHeight *= ratio;
-                }
-
-                if (newHeight > maxHeight) {
-                    const ratio = maxHeight / newHeight;
-                    newHeight = maxHeight;
-                    newWidth *= ratio;
-                }
-
-                canvas.width = newWidth;
-                canvas.height = newHeight;
-                ctx.drawImage(image, 0, 0, newWidth, newHeight);
-                const resizedImage = canvas.toDataURL('image/jpeg');
-                setEditedForm({ ...editedForm, image: resizedImage });
-            };
-        };
-        reader.readAsDataURL(selectedFile);
-    };
-
     const editMovie = () => {
         setEditedForm({ ...form, email: authUser.email })
         setPopupActive(true)
@@ -95,7 +58,10 @@ const MovieDetails = () => {
         /* eslint-disable no-restricted-globals */
         const result = confirm(`Are you sure want to delete ${ form.title } movie?`);
         if (result) {
+
             try {
+                const imageRef = ref(storage, form.image);
+                await deleteObject(imageRef);
                 await axios.delete(`${ form._id }`);
                 navigate('/');
             } catch (error) {
@@ -107,12 +73,42 @@ const MovieDetails = () => {
 
     const submitMovie = async (e) => {
         e.preventDefault();
-        try {
-            await axios.put(`${ editedForm._id }`, editedForm);
-            setPopupActive(false)
-            navigate('/');
-        } catch (error) {
-            console.error('Error updating movie:', error);
+
+        if (imageUpload) {
+            const previousImageRef = ref(storage, form.image);
+
+            try {
+                await deleteObject(previousImageRef);
+            } catch (error) {
+                console.error('Error deleting previous image:', error);
+            }
+
+            const newImageRef = ref(storage, `images/${ v4() }`);
+            try {
+                await uploadBytes(newImageRef, imageUpload);
+                const imageUrl = await getDownloadURL(newImageRef);
+                const updatedForm = { ...editedForm, image: imageUrl };
+
+                try {
+                    await axios.put(`${ editedForm._id }`, updatedForm);
+                    setPopupActive(false);
+                    navigate('/');
+                } catch (error) {
+                    console.error('Error updating movie:', error);
+                }
+
+            } catch (error) {
+                console.error('Error uploading new image:', error);
+            }
+
+        } else {
+            try {
+                await axios.put(`${ editedForm._id }`, editedForm);
+                setPopupActive(false);
+                navigate('/');
+            } catch (error) {
+                console.error('Error updating movie:', error);
+            }
         }
     }
 
@@ -161,7 +157,7 @@ const MovieDetails = () => {
                                 type="file"
                                 id="image"
                                 name="image"
-                                onChange={uploadMovie}
+                                onChange={(e) => setImageUpload(e.target.files[0])}
                             />
                             <label htmlFor='image'>Plot</label>
                             <textarea required id='plot' rows={5} value={editedForm.plot} onChange={(e) =>

@@ -22,7 +22,6 @@ const Navigation = () => {
 
   const userSignOut = () => {
     signOut(auth).then(() => {
-      console.log("Sign out successful");
     }).catch((error) => {
       console.log(error);
     })

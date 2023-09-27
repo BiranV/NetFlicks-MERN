@@ -3,9 +3,12 @@ import Movie from '../components/Movie'
 import Snackbar from "../components/Snackbar";
 import axios from "../api/axios"
 import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "../firebase"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { auth, storage } from "../firebase"
+import { v4 } from "uuid"
 
 const Home = () => {
+    const [imageUpload, setImageUpload] = useState(null);
     const [authUser, setAuthUser] = useState(null);
     const [form, setForm] = useState({
         title: "",
@@ -24,17 +27,19 @@ const Home = () => {
 
 
     useEffect(() => {
-        const fetchMoviesData = async () => {
-            try {
-                const res = await axios.get("/");
-                setMovies(res.data);
-            } catch (error) {
-                console.error('Error fetching movies:', error);
-            }
-        };
+        if (!popupActive) {
+            const fetchMoviesData = async () => {
+                try {
+                    const res = await axios.get("/");
+                    setMovies(res.data);
+                } catch (error) {
+                    console.error('Error fetching movies:', error);
+                }
+            };
 
-        fetchMoviesData();
-    }, [movies]);
+            fetchMoviesData();
+        }
+    }, [popupActive]);
 
     useEffect(() => {
         const listen = onAuthStateChanged(auth, (user) => {
@@ -51,21 +56,11 @@ const Home = () => {
         return () => listen()
     }, [])
 
-    const filteredMovies = movies.filter((item) => item.genre.toLowerCase() === filter.toLowerCase() || filter === '');
+    const filteredMovies = movies.filter((item) => item.genre || filter === '');
     const filterMovies = (e) => {
         if (e.target.value === 'All') {
             setFilter('')
         } else setFilter(e.target.value);
-    }
-
-    const submitMovie = async (e) => {
-        e.preventDefault();
-        try {
-            await axios.post("/", form)
-            setPopupActive(false);
-        } catch (error) {
-            console.error('Error adding movie:', error);
-        }
     }
 
     const addMovie = () => {
@@ -80,45 +75,26 @@ const Home = () => {
         setPopupActive(true);
     }
 
-    const uploadImage = (e) => {
-        const selectedFile = e.target.files[0];
-        const maxWidth = 800;
-        const maxHeight = 600;
+    const submitMovie = async (e) => {
+        e.preventDefault();
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const image = new Image();
-            image.src = event.target.result;
+        const imageRef = ref(storage, `images/${ v4() }`);
+        try {
+            await uploadBytes(imageRef, imageUpload)
+            const imageUrl = await getDownloadURL(imageRef);
+            const updatedForm = { ...form, image: imageUrl };
 
-            image.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+            try {
+                await axios.post("/", updatedForm)
+            } catch (error) {
+                console.error('Error adding movie:', error);
+            }
 
-                let newWidth = image.width;
-                let newHeight = image.height;
-
-                // Calculate new dimensions while maintaining aspect ratio
-                if (newWidth > maxWidth) {
-                    const ratio = maxWidth / newWidth;
-                    newWidth = maxWidth;
-                    newHeight *= ratio;
-                }
-
-                if (newHeight > maxHeight) {
-                    const ratio = maxHeight / newHeight;
-                    newHeight = maxHeight;
-                    newWidth *= ratio;
-                }
-
-                canvas.width = newWidth;
-                canvas.height = newHeight;
-                ctx.drawImage(image, 0, 0, newWidth, newHeight);
-                const resizedImage = canvas.toDataURL('image/jpeg');
-                setForm({ ...form, image: resizedImage });
-            };
-        };
-        reader.readAsDataURL(selectedFile);
-    };
+        } catch (error) {
+            console.error('Error adding movie:', error);
+        }
+        setPopupActive(false);
+    }
 
     return (
         <>
@@ -164,7 +140,7 @@ const Home = () => {
                                 type="file"
                                 id="image"
                                 name="image"
-                                onChange={uploadImage}
+                                onChange={(e) => setImageUpload(e.target.files[0])}
                             />
                             <label htmlFor='image'>Plot</label>
                             <textarea required id='plot' rows={5} value={form.plot} onChange={(e) =>
