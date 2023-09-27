@@ -32,7 +32,7 @@ const Navigation = () => {
     <header className="header">
       <Link to='/' className="title">NetFlicks</Link>
       <div>
-        {authUser ? <Link onClick={userSignOut} className="btn">Sign out {authUser.email}</Link> :
+        {authUser ? <Link onClick={userSignOut} className="btn">Sign out</Link> :
           <Link to='/auth' className="btn">Login</Link>}
       </div>
     </header >
