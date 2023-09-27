@@ -57,7 +57,7 @@ const Home = () => {
         return () => listen()
     }, [])
 
-    const filteredMovies = movies.filter((item) => item.genre || filter === '');
+    const filteredMovies = movies.filter((item) => item.genre === filter || filter === '');
     const filterMovies = (e) => {
         if (e.target.value === 'All') {
             setFilter('')
