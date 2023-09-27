@@ -17,6 +17,7 @@ const MovieDetails = () => {
     const [editedForm, setEditedForm] = useState({})
     const [notFound, setNotFound] = useState(false);
     const [popupActive, setPopupActive] = useState(false);
+    const [loading, setLoading] = useState(false);
     const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
 
@@ -73,6 +74,7 @@ const MovieDetails = () => {
 
     const submitMovie = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         if (imageUpload) {
             const previousImageRef = ref(storage, form.image);
@@ -110,6 +112,7 @@ const MovieDetails = () => {
                 console.error('Error updating movie:', error);
             }
         }
+        setLoading(false);
     }
 
     if (notFound) {
@@ -164,8 +167,8 @@ const MovieDetails = () => {
                                 setEditedForm({ ...editedForm, plot: e.target.value })
                             }></textarea>
                             <div className="buttons">
-                                <button type="submit" className="save">Save</button>
-                                <button type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
+                                <button disabled={loading} type="submit" className="save">Save</button>
+                                <button disabled={loading} type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
                             </div>
                         </form>
                     </div >

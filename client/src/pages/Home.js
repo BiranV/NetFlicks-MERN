@@ -21,6 +21,7 @@ const Home = () => {
     const [filter, setFilter] = useState("");
     const [movies, setMovies] = useState([]);
     const [popupActive, setPopupActive] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const genres = ['All', 'Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
@@ -77,6 +78,7 @@ const Home = () => {
 
     const submitMovie = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         const imageRef = ref(storage, `images/${ v4() }`);
         try {
@@ -94,6 +96,7 @@ const Home = () => {
             console.error('Error adding movie:', error);
         }
         setPopupActive(false);
+        setLoading(false);
     }
 
     return (
@@ -147,8 +150,8 @@ const Home = () => {
                                 setForm({ ...form, plot: e.target.value })
                             }></textarea>
                             <div className="">
-                                <button type="submit" className="save">Save</button>
-                                <button type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
+                                <button disabled={loading} type="submit" className="save">Save</button>
+                                <button disabled={loading} type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
                             </div>
                         </form>
                     </div >
