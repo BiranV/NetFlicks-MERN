@@ -17,6 +17,7 @@ const MovieDetails = () => {
     const [editedForm, setEditedForm] = useState({})
     const [notFound, setNotFound] = useState(false);
     const [popupActive, setPopupActive] = useState(false);
+    const [popupError, setPopupError] = useState("");
     const [loading, setLoading] = useState(false);
     const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
@@ -52,21 +53,28 @@ const MovieDetails = () => {
     }, [])
 
     const editMovie = () => {
-        setEditedForm({ ...form, email: authUser.email })
-        setPopupActive(true)
+        if (authUser.email !== form.email) {
+            setPopupError("Editing other's movies is not allowed!")
+        } else {
+            setEditedForm({ ...form, email: authUser.email })
+            setPopupActive(true)
+        }
     }
     const deleteMovie = async () => {
-        /* eslint-disable no-restricted-globals */
-        const result = confirm(`Are you sure want to delete ${ form.title } movie?`);
-        if (result) {
-
-            try {
-                const imageRef = ref(storage, form.image);
-                await deleteObject(imageRef);
-                await axios.delete(`${ form._id }`);
-                navigate('/');
-            } catch (error) {
-                console.error('Error deleting movie:', error);
+        if (authUser.email !== form.email) {
+            setPopupError("Deleting other's movies is not allowed!")
+        } else {
+            /* eslint-disable no-restricted-globals */
+            const result = confirm(`Are you sure want to delete ${ form.title } movie?`);
+            if (result) {
+                try {
+                    const imageRef = ref(storage, form.image);
+                    await deleteObject(imageRef);
+                    await axios.delete(`${ form._id }`);
+                    navigate('/');
+                } catch (error) {
+                    console.error('Error deleting movie:', error);
+                }
             }
         }
         /* eslint-enable no-restricted-globals */
@@ -174,6 +182,14 @@ const MovieDetails = () => {
                     </div >
                 </div >
             )
+            }
+            {popupError &&
+                <div className="popup">
+                    <div className="error">
+                        <h2>{popupError}</h2>
+                        <button className="sorry" onClick={(e) => setPopupError("")}>OK, Sorry</button>
+                    </div >
+                </div >
             }
         </>
     )
