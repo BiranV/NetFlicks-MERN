@@ -1,13 +1,17 @@
 ## Live project using Vercel: https://netflicks-client.vercel.app
-![netflicks1](https://github.com/BiranV/NetFlicks/assets/59264488/28e1c1e5-8121-43dd-96c8-f2f8e6be448d)
+![01](https://github.com/BiranV/NetFlicks/assets/59264488/68a780b5-4a5e-42c6-80a3-1958f209c677)
 
-![netflicks2](https://github.com/BiranV/NetFlicks/assets/59264488/8222ea88-175b-493a-afff-37333addede2)
+![02](https://github.com/BiranV/NetFlicks/assets/59264488/bc395d16-ad9d-4205-85fc-27ab910de5fe)
 
-![netflicks3](https://github.com/BiranV/NetFlicks/assets/59264488/0a80bdc6-2907-4b73-9f38-91c4d7b7d71e)
+![03](https://github.com/BiranV/NetFlicks/assets/59264488/47d3e1a0-5d8a-4cb1-bbe8-41c10d75e65a)
 
-![netflicks4](https://github.com/BiranV/NetFlicks/assets/59264488/cd356aad-3eb6-41f1-aa24-5064a7b739a1)
+![4](https://github.com/BiranV/NetFlicks/assets/59264488/3ca46ba3-1654-4d54-99b6-a9f469c19084)
 
-![netflicks5](https://github.com/BiranV/NetFlicks/assets/59264488/483f767e-c79e-4a4a-8831-c2804ea71e7b)
+![5](https://github.com/BiranV/NetFlicks/assets/59264488/f08056df-2112-401e-a932-f6dfe4ea07a9)
+
+![6](https://github.com/BiranV/NetFlicks/assets/59264488/1a9437af-5237-48cc-b2af-f7abcd9eef46)
+
+![7](https://github.com/BiranV/NetFlicks/assets/59264488/b0fd67f2-dab2-4cdf-abff-1088c6588e12)
 
 ## Available Scripts
 
