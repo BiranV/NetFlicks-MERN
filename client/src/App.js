@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react"
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom"
 import Navigation from "./components/Navigation"
-import CSS from "./components/CSS"
 import Home from "./pages/Home"
 import { Provider } from "react-redux";
 import store from './store/index';
@@ -15,7 +14,6 @@ function App() {
       path: "/", element: <Layout />, children: [
         { path: "/", element: <Home /> },
         { path: "/auth", element: <Auth /> },
-        { path: "/css", element: <CSS /> },
         { path: "/:id", element: <MovieDetails /> },
       ]
     }
