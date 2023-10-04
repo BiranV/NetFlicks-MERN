@@ -4,19 +4,18 @@ import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "../firebase"
 
 const Navigation = () => {
-  const [authUser, setAuthUser] = useState(null);
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     const listen = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setAuthUser(user)
+      if (user && user.emailVerified) {
+        setVerified(true)
       } else {
-        setAuthUser(null)
-
+        setVerified(false)
       }
     })
     return () => listen()
-  }, [])
+  }, [verified])
 
   const userSignOut = () => {
     signOut(auth).then(() => {
@@ -30,8 +29,11 @@ const Navigation = () => {
     <header className="header">
       <Link to='/' className="title">NetFlicks</Link>
       <div>
-        {authUser ? <Link onClick={userSignOut} className="btn">Sign out</Link> :
-          <Link to='/auth' className="btn">Login</Link>}
+        {!verified ?
+          <Link to='/login' className="btn">Login</Link>
+          :
+          <Link onClick={userSignOut} className="btn">Logout</Link>
+        }
       </div>
     </header >
   )

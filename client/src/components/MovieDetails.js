@@ -38,8 +38,8 @@ const MovieDetails = () => {
 
     useEffect(() => {
         const listen = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setAuthUser(user)
+            if (user && user.emailVerified) {
+                setAuthUser(user);
                 setForm((prevForm) => ({
                     ...prevForm,
                     email: user.email || ""

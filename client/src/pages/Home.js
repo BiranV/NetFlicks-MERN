@@ -44,7 +44,7 @@ const Home = () => {
 
     useEffect(() => {
         const listen = onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && user.emailVerified) {
                 setAuthUser(user)
                 setForm((prevForm) => ({
                     ...prevForm,

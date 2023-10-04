@@ -5,7 +5,8 @@ import Home from "./pages/Home"
 import { Provider } from "react-redux";
 import store from './store/index';
 
-const Auth = lazy(() => import('./components/Auth'));
+const Login = lazy(() => import('./components/Login'));
+const Signup = lazy(() => import('./components/Signup'));
 const MovieDetails = lazy(() => import('./components/MovieDetails'));
 
 function App() {
@@ -13,7 +14,8 @@ function App() {
     {
       path: "/", element: <Layout />, children: [
         { path: "/", element: <Home /> },
-        { path: "/auth", element: <Auth /> },
+        { path: "/login", element: <Login /> },
+        { path: "/signup", element: <Signup /> },
         { path: "/:id", element: <MovieDetails /> },
       ]
     }
