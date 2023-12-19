@@ -8,11 +8,7 @@ const Navigation = () => {
 
   useEffect(() => {
     const listen = onAuthStateChanged(auth, (user) => {
-      if (user && user.emailVerified) {
-        setVerified(true)
-      } else {
-        setVerified(false)
-      }
+      setVerified(user && user.emailVerified)
     })
     return () => listen()
   }, [verified])

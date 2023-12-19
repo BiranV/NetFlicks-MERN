@@ -21,6 +21,10 @@ const Home = () => {
     const [filter, setFilter] = useState("");
     const [movies, setMovies] = useState([]);
     const [popupActive, setPopupActive] = useState(false);
+    const [snackbarActive, setSnackbarActive] = useState({
+        show: false,
+        text: "",
+    });
     const [loading, setLoading] = useState(false);
 
     const genres = ['All', 'Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
@@ -87,7 +91,8 @@ const Home = () => {
             const updatedForm = { ...form, image: imageUrl };
 
             try {
-                await axios.post("/", updatedForm)
+                const res = await axios.post("/", updatedForm)
+                handleSnackbar(res.data.message)
             } catch (error) {
                 console.error('Error adding movie:', error);
             }
@@ -98,6 +103,14 @@ const Home = () => {
         setPopupActive(false);
         setLoading(false);
     }
+
+
+    const handleSnackbar = (val) => {
+        setSnackbarActive({ show: true, text: val });
+        setTimeout(() => {
+            setSnackbarActive({ show: false, text: "" });
+        }, 2000);
+    };
 
     return (
         <>
@@ -112,7 +125,7 @@ const Home = () => {
                 <ul>
                     {filteredMovies.length > 0 && filteredMovies.map((movie) => (
                         <Movie movie={movie} key={movie._id} />))}
-                    {filteredMovies.length <= 0 && filter !== "" && <Snackbar text="There are no movies in this genre yet" />}
+                    {filteredMovies.length <= 0 && filter !== "" && <p> There are no movies in this genre yet </p>}
                 </ul >
             </div >
             {popupActive && (
@@ -157,6 +170,7 @@ const Home = () => {
                     </div >
                 </div >
             )}
+            {snackbarActive.show && <Snackbar text={snackbarActive.text} />}
         </>
     )
 }

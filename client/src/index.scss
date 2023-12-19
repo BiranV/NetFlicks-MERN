@@ -183,6 +183,10 @@ form {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
+
+    p {
+      margin: 0 auto;
+    }
   }
 }
 
@@ -226,6 +230,10 @@ form {
 }
 
 .movie-details {
+  p {
+    margin-top: 1rem;
+  }
+
   img {
     border: 1px solid $light;
     object-fit: cover;
@@ -297,4 +305,19 @@ form {
     background-color: $dark;
     margin: 1rem 0;
   }
+}
+
+.snackbar {
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: $background-snackbar;
+  color: $backgrond-color;
+  text-align: center;
+  border: 2px solid white;
+  border-radius: 2px;
+  padding: 8px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
 }

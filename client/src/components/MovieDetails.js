@@ -19,6 +19,10 @@ const MovieDetails = () => {
     const [popupActive, setPopupActive] = useState(false);
     const [popupError, setPopupError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [snackbarActive, setSnackbarActive] = useState({
+        show: false,
+        text: "",
+    });
     const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
 
@@ -70,7 +74,8 @@ const MovieDetails = () => {
                 try {
                     const imageRef = ref(storage, form.image);
                     await deleteObject(imageRef);
-                    await axios.delete(`${ form._id }`);
+                    const res = await axios.delete(`${ form._id }`);
+                    handleSnackbar(res.data.message)
                     navigate('/');
                 } catch (error) {
                     console.error('Error deleting movie:', error);
@@ -100,7 +105,8 @@ const MovieDetails = () => {
                 const updatedForm = { ...editedForm, image: imageUrl };
 
                 try {
-                    await axios.put(`${ editedForm._id }`, updatedForm);
+                    const res = await axios.put(`${ editedForm._id }`, updatedForm);
+                    handleSnackbar(res.data.message)
                     setPopupActive(false);
                     navigate('/');
                 } catch (error) {
@@ -113,7 +119,8 @@ const MovieDetails = () => {
 
         } else {
             try {
-                await axios.put(`${ editedForm._id }`, editedForm);
+                const res = await axios.put(`${ editedForm._id }`, editedForm);
+                handleSnackbar(res.data.message)
                 setPopupActive(false);
                 navigate('/');
             } catch (error) {
@@ -123,23 +130,31 @@ const MovieDetails = () => {
         setLoading(false);
     }
 
-    if (notFound) {
-        return <Snackbar text={"Page Not Found"} />
-    }
+
+    const handleSnackbar = (val) => {
+        setSnackbarActive({ show: true, text: val });
+        setTimeout(() => {
+            setSnackbarActive({ show: false, text: "" });
+        }, 2000);
+    };
+
     return (
-        <>
-            <div className="movie-details">
-                <img src={form.image} alt={form.title} />
-                <h1>{form.title}</h1>
-                <address>{form.genre}</address>
-                <h3>{'★'.repeat(form.rate)}</h3>
-                <div className="plot">{form.plot}
-                </div>
-                <div className="buttons">
-                    <button disabled={!authUser} className="edit" onClick={editMovie}>Edit</button>
-                    <button disabled={!authUser} className="delete" onClick={deleteMovie}>Delete</button>
-                </div>
-            </div>
+        <div className="movie-details">
+            {notFound ?
+                <p>Page Not Found</p>
+                :
+                <div>
+                    <img src={form.image} alt={form.title} />
+                    <h1>{form.title}</h1>
+                    <address>{form.genre}</address>
+                    <h3>{'★'.repeat(form.rate)}</h3>
+                    <div className="plot">{form.plot}
+                    </div>
+                    <div className="buttons">
+                        <button disabled={!authUser} className="edit" onClick={editMovie}>Edit</button>
+                        <button disabled={!authUser} className="delete" onClick={deleteMovie}>Delete</button>
+                    </div>
+                </div>}
             {popupActive && (
                 <div className="popup">
                     <div className="inner">
@@ -191,7 +206,8 @@ const MovieDetails = () => {
                     </div >
                 </div >
             }
-        </>
+            {snackbarActive.show && <Snackbar text={snackbarActive.text} />}
+        </div>
     )
 }
 

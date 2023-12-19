@@ -2,12 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "../firebase"
-import Snackbar from "./Snackbar";
-
 
 const Login = () => {
     const navigate = useNavigate();
-    const signInError = "The email or password you entered is incorrect. Please check your credentials or sign up if you don't have an account"
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(false);
@@ -44,7 +41,7 @@ const Login = () => {
         <div className="auth">
             <form onSubmit={userSignIn}>
                 <h2>Sign In</h2>
-                {error && <Snackbar text={signInError} />}
+                {error && <p>The email or password you entered is incorrect. Please check your credentials or sign up if you don't have an account</p>}
                 <label htmlFor="email" >Email</label>
                 <input type="email" id="email" placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)}
                 />
