@@ -16,7 +16,7 @@ const Login = () => {
             }
         })
         return () => listen()
-    }, [])
+    }, [navigate])
 
     const userSignIn = (e) => {
         e.preventDefault();
