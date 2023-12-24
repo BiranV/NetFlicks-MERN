@@ -32,34 +32,29 @@ const Home = () => {
 
 
     useEffect(() => {
-        if (!popupActive) {
-            const fetchMoviesData = async () => {
-                try {
-                    const res = await axios.get("/");
-                    setMovies(res.data);
-                } catch (error) {
-                    console.error('Error fetching movies:', error);
-                }
-            };
+        const fetchMoviesData = async () => {
+            try {
+                const res = await axios.get("/");
+                setMovies(res.data);
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+            }
+        };
 
-            fetchMoviesData();
-        }
-    }, [popupActive]);
+        fetchMoviesData();
+    }, []);
 
     useEffect(() => {
-        const listen = onAuthStateChanged(auth, (user) => {
-            if (user && user.emailVerified) {
-                setAuthUser(user)
-                setForm((prevForm) => ({
-                    ...prevForm,
-                    email: user.email || ""
-                }));
-            } else {
-                setAuthUser(null)
-            }
-        })
-        return () => listen()
-    }, [])
+        const unsubscriber = onAuthStateChanged(auth, (user) => {
+            setAuthUser(user && user.emailVerified ? user : null);
+            setForm((prevForm) => ({
+                ...prevForm,
+                email: (user && user.email) || '',
+            }));
+        });
+        return () => unsubscriber();
+    }, []);
+
 
     const filteredMovies = movies.filter((item) => item.genre === filter || filter === '');
     const filterMovies = (e) => {
@@ -92,6 +87,8 @@ const Home = () => {
 
             try {
                 const res = await axios.post("/", updatedForm)
+                const newMovie = res.data.movie;
+                setMovies((prevMovies) => [newMovie, ...prevMovies]);
                 handleSnackbar(res.data.message)
             } catch (error) {
                 console.error('Error adding movie:', error);

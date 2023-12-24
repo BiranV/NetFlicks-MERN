@@ -5,10 +5,10 @@ import { onAuthStateChanged } from "firebase/auth"
 import { auth, storage } from "../firebase"
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
 import axios from "../api/axios"
-import Snackbar from './Snackbar';
+import Snackbar from "../components/Snackbar"
 import { v4 } from "uuid"
 
-const MovieDetails = () => {
+const MovieDetails = ({ updateMovies }) => {
     const navigate = useNavigate();
     let { id } = useParams();
     const [authUser, setAuthUser] = useState(null);
@@ -41,32 +41,29 @@ const MovieDetails = () => {
     }, [id]);
 
     useEffect(() => {
-        const listen = onAuthStateChanged(auth, (user) => {
-            if (user && user.emailVerified) {
-                setAuthUser(user);
-                setForm((prevForm) => ({
-                    ...prevForm,
-                    email: user.email || ""
-                }));
-            } else {
-                setAuthUser(null)
+        const unsubscriber = onAuthStateChanged(auth, (user) => {
+            setAuthUser(user && user.emailVerified ? user : null);
+            setForm((prevForm) => ({
+                ...prevForm,
+                email: (user && user.email) || '',
+            }));
+        });
+        return () => unsubscriber();
+    }, []);
 
-            }
-        })
-        return () => listen()
-    }, [])
 
     const editMovie = () => {
         if (authUser.email !== form.email) {
-            setPopupError("Editing other's movies is not allowed!")
+            setPopupError("Editing other's movie is not allowed!")
         } else {
             setEditedForm({ ...form, email: authUser.email })
             setPopupActive(true)
         }
     }
+
     const deleteMovie = async () => {
         if (authUser.email !== form.email) {
-            setPopupError("Deleting other's movies is not allowed!")
+            setPopupError("Deleting other's movie is not allowed!")
         } else {
             /* eslint-disable no-restricted-globals */
             const result = confirm(`Are you sure want to delete ${ form.title } movie?`);
@@ -75,8 +72,9 @@ const MovieDetails = () => {
                     const imageRef = ref(storage, form.image);
                     await deleteObject(imageRef);
                     const res = await axios.delete(`${ form._id }`);
-                    handleSnackbar(res.data.message)
                     navigate('/');
+                    handleSnackbar(res.data.message)
+
                 } catch (error) {
                     console.error('Error deleting movie:', error);
                 }
