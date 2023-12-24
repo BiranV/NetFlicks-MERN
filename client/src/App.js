@@ -7,7 +7,7 @@ import store from './store/index';
 
 const Login = lazy(() => import('./components/Login'));
 const Signup = lazy(() => import('./components/Signup'));
-const MovieDetails = lazy(() => import('./components/MovieDetails'));
+const MovieDetails = lazy(() => import('./pages/MovieDetails'));
 
 function App() {
   const router = createBrowserRouter([
