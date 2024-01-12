@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "./Card"
 
@@ -22,4 +23,4 @@ const Movie = (props) => {
     )
 }
 
-export default Movie
+export default memo(Movie)

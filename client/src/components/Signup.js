@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification } from "firebase/auth"
 import { auth } from "../firebase"
 
 const Signup = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const email = useRef('');
+    const password = useRef('');
     const [error, setError] = useState(false);
 
     useEffect(() => {
@@ -21,7 +21,7 @@ const Signup = () => {
     const userSignUp = (e) => {
         e.preventDefault();
 
-        createUserWithEmailAndPassword(auth, email, password)
+        createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
             .then(() => {
                 sendEmailVerification(auth.currentUser).then(() => {
                     alert("Email verification sent!")
@@ -46,10 +46,9 @@ const Signup = () => {
                 <h2>Sign Up</h2>
                 {error && <p>There is an error. Please try again</p>}
                 <label htmlFor="email" >Email</label>
-                <input type="email" id="email" placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)}
-                />
+                <input type="email" id="email" placeholder='Enter your email' ref={email} />
                 <label htmlFor="password" >Password</label>
-                <input type="password" id="password" placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input type="password" id="password" placeholder='Enter your password' ref={password} />
                 <p>Password should be at least 6 characters</p>
                 <button type='submit'>Sign Up</button>
                 <label>Already have an account? <a href="" onClick={changeToSignIn}>Click here</a></label>

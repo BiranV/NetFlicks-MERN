@@ -32,29 +32,28 @@ const Home = () => {
 
 
     useEffect(() => {
-        const fetchMoviesData = async () => {
+        const fetchDataAndAuth = async () => {
             try {
                 const res = await axios.get("/");
                 setMovies(res.data);
+
+                const unsubscriber = onAuthStateChanged(auth, (user) => {
+                    setAuthUser(user && user.emailVerified ? user : null);
+                    setForm((prevForm) => ({
+                        ...prevForm,
+                        email: (user && user.email) || '',
+                    }));
+                });
+
+                return () => unsubscriber();
+
             } catch (error) {
                 console.error('Error fetching movies:', error);
             }
         };
 
-        fetchMoviesData();
+        fetchDataAndAuth();
     }, []);
-
-    useEffect(() => {
-        const unsubscriber = onAuthStateChanged(auth, (user) => {
-            setAuthUser(user && user.emailVerified ? user : null);
-            setForm((prevForm) => ({
-                ...prevForm,
-                email: (user && user.email) || '',
-            }));
-        });
-        return () => unsubscriber();
-    }, []);
-
 
     const filteredMovies = movies.filter((item) => item.genre === filter || filter === '');
     const filterMovies = (e) => {
@@ -63,7 +62,7 @@ const Home = () => {
         } else setFilter(e.target.value);
     }
 
-    const addMovie = () => {
+    const showForm = () => {
         setForm({
             title: "",
             genre: "",
@@ -112,7 +111,7 @@ const Home = () => {
     return (
         <>
             <div className="movies-list">
-                <button disabled={!authUser} className="add-btn" onClick={addMovie}>Add a movie</button>
+                <button disabled={!authUser} className="add-btn" onClick={showForm}>Add a movie</button>
                 <select required id="filter" name="filter" value={filter} onChange={filterMovies}>
                     <option value="" disabled>Filter by genre</option>
                     {genres.map((genre) => (

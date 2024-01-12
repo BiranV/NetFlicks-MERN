@@ -8,7 +8,7 @@ import axios from "../api/axios"
 import Snackbar from "../components/Snackbar"
 import { v4 } from "uuid"
 
-const MovieDetails = ({ updateMovies }) => {
+const MovieDetails = () => {
     const navigate = useNavigate();
     let { id } = useParams();
     const [authUser, setAuthUser] = useState(null);
@@ -27,30 +27,28 @@ const MovieDetails = ({ updateMovies }) => {
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
 
     useEffect(() => {
-        const fetchMovieData = async () => {
+        const fetchDataAndAuth = async () => {
             try {
                 const res = await axios.get(`${ id }`);
                 setForm(res.data);
+
+                const unsubscriber = onAuthStateChanged(auth, (user) => {
+                    setAuthUser(user && user.emailVerified ? user : null);
+                    setForm((prevForm) => ({
+                        ...prevForm,
+                        email: (user && user.email) || '',
+                    }));
+                });
+
+                return () => unsubscriber();
             } catch (error) {
                 setNotFound(true)
                 console.error('Error fetching movie:', error);
             }
         };
 
-        fetchMovieData();
+        fetchDataAndAuth();
     }, [id]);
-
-    useEffect(() => {
-        const unsubscriber = onAuthStateChanged(auth, (user) => {
-            setAuthUser(user && user.emailVerified ? user : null);
-            setForm((prevForm) => ({
-                ...prevForm,
-                email: (user && user.email) || '',
-            }));
-        });
-        return () => unsubscriber();
-    }, []);
-
 
     const editMovie = () => {
         if (authUser.email !== form.email) {

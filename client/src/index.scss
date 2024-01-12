@@ -25,6 +25,7 @@ body {
 
 button {
   border: none;
+  cursor: pointer;
 }
 
 
@@ -139,7 +140,6 @@ form {
   }
 
   .btn {
-    cursor: pointer;
     text-decoration: none;
     font-size: 1rem;
     color: $dark;
@@ -221,7 +221,6 @@ form {
 
   button {
     font: inherit;
-    cursor: pointer;
     border: 1px solid #ccc;
     background-color: transparent;
     padding: 0.5rem 1.5rem;
