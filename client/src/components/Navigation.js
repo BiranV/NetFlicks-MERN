@@ -19,7 +19,7 @@ const Navigation = () => {
     signOut(auth).then(() => {
       navigate("/login");
     }).catch((error) => {
-      console.log(error);
+      console.error(error);
     })
   }
 

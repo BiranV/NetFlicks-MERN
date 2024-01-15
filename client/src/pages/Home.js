@@ -1,61 +1,35 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Movie from '../components/Movie'
 import Snackbar from "../components/Snackbar";
 import axios from "../api/axios"
-import { onAuthStateChanged } from "firebase/auth"
+import useFetch from "../hooks/useFetch"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { auth, storage } from "../firebase"
+import { storage } from "../firebase"
 import { v4 } from "uuid"
 
 const Home = () => {
+    const { authUser, data, setData } = useFetch("/");
     const [imageUpload, setImageUpload] = useState(null);
-    const [authUser, setAuthUser] = useState(null);
-    const [form, setForm] = useState({
-        title: "",
-        genre: "",
-        rate: "",
-        image: "",
-        plot: "",
-        email: "",
-    })
     const [filter, setFilter] = useState("");
-    const [movies, setMovies] = useState([]);
     const [popupActive, setPopupActive] = useState(false);
     const [snackbarActive, setSnackbarActive] = useState({
         show: false,
         text: "",
     });
     const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({
+        title: "",
+        genre: "",
+        rate: "",
+        image: "",
+        plot: "",
+        email: authUser?.email
+    })
 
     const genres = ['All', 'Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
 
-
-    useEffect(() => {
-        const fetchDataAndAuth = async () => {
-            try {
-                const res = await axios.get("/");
-                setMovies(res.data);
-
-                const unsubscriber = onAuthStateChanged(auth, (user) => {
-                    setAuthUser(user && user.emailVerified ? user : null);
-                    setForm((prevForm) => ({
-                        ...prevForm,
-                        email: (user && user.email) || '',
-                    }));
-                });
-
-                return () => unsubscriber();
-
-            } catch (error) {
-                console.error('Error fetching movies:', error);
-            }
-        };
-
-        fetchDataAndAuth();
-    }, []);
-
-    const filteredMovies = movies.filter((item) => item.genre === filter || filter === '');
+    const filteredMovies = data.filter((item) => item.genre === filter || filter === '');
     const filterMovies = (e) => {
         if (e.target.value === 'All') {
             setFilter('')
@@ -69,7 +43,7 @@ const Home = () => {
             rate: "",
             image: "",
             plot: "",
-            email: authUser.email
+            email: authUser?.email
         });
         setPopupActive(true);
     }
@@ -87,7 +61,7 @@ const Home = () => {
             try {
                 const res = await axios.post("/", updatedForm)
                 const newMovie = res.data.movie;
-                setMovies((prevMovies) => [newMovie, ...prevMovies]);
+                setData((prevMovies) => [newMovie, ...prevMovies]);
                 handleSnackbar(res.data.message)
             } catch (error) {
                 console.error('Error adding movie:', error);

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from "firebase/auth"
-import { auth, storage } from "../firebase"
+import useFetch from "../hooks/useFetch"
+import { storage } from "../firebase"
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
 import axios from "../api/axios"
 import Snackbar from "../components/Snackbar"
@@ -10,12 +10,9 @@ import { v4 } from "uuid"
 
 const MovieDetails = () => {
     const navigate = useNavigate();
-    let { id } = useParams();
-    const [authUser, setAuthUser] = useState(null);
+    const { data, authUser } = useFetch(useParams().id);
     const [imageUpload, setImageUpload] = useState(null);
-    const [form, setForm] = useState({})
     const [editedForm, setEditedForm] = useState({})
-    const [notFound, setNotFound] = useState(false);
     const [popupActive, setPopupActive] = useState(false);
     const [popupError, setPopupError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -26,50 +23,26 @@ const MovieDetails = () => {
     const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
     const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
 
-    useEffect(() => {
-        const fetchDataAndAuth = async () => {
-            try {
-                const res = await axios.get(`${ id }`);
-                setForm(res.data);
-
-                const unsubscriber = onAuthStateChanged(auth, (user) => {
-                    setAuthUser(user && user.emailVerified ? user : null);
-                    setForm((prevForm) => ({
-                        ...prevForm,
-                        email: (user && user.email) || '',
-                    }));
-                });
-
-                return () => unsubscriber();
-            } catch (error) {
-                setNotFound(true)
-                console.error('Error fetching movie:', error);
-            }
-        };
-
-        fetchDataAndAuth();
-    }, [id]);
-
     const editMovie = () => {
-        if (authUser.email !== form.email) {
+        if (authUser.email !== data.email) {
             setPopupError("Editing other's movie is not allowed!")
         } else {
-            setEditedForm({ ...form, email: authUser.email })
+            setEditedForm({ ...data, email: authUser.email })
             setPopupActive(true)
         }
     }
 
     const deleteMovie = async () => {
-        if (authUser.email !== form.email) {
+        if (authUser.email !== data.email) {
             setPopupError("Deleting other's movie is not allowed!")
         } else {
             /* eslint-disable no-restricted-globals */
-            const result = confirm(`Are you sure want to delete ${ form.title } movie?`);
+            const result = confirm(`Are you sure want to delete ${ data.title } movie?`);
             if (result) {
                 try {
-                    const imageRef = ref(storage, form.image);
+                    const imageRef = ref(storage, data.image);
                     await deleteObject(imageRef);
-                    const res = await axios.delete(`${ form._id }`);
+                    const res = await axios.delete(`${ data._id }`);
                     navigate('/');
                     handleSnackbar(res.data.message)
 
@@ -86,7 +59,7 @@ const MovieDetails = () => {
         setLoading(true);
 
         if (imageUpload) {
-            const previousImageRef = ref(storage, form.image);
+            const previousImageRef = ref(storage, data.image);
 
             try {
                 await deleteObject(previousImageRef);
@@ -136,15 +109,15 @@ const MovieDetails = () => {
 
     return (
         <div className="movie-details">
-            {notFound ?
+            {data.length === 0 ?
                 <p>Page Not Found</p>
                 :
                 <div>
-                    <img src={form.image} alt={form.title} />
-                    <h1>{form.title}</h1>
-                    <address>{form.genre}</address>
-                    <h3>{'★'.repeat(form.rate)}</h3>
-                    <div className="plot">{form.plot}
+                    <img src={data.image} alt={data.title} />
+                    <h1>{data.title}</h1>
+                    <address>{data.genre}</address>
+                    <h3>{'★'.repeat(data.rate)}</h3>
+                    <div className="plot">{data.plot}
                     </div>
                     <div className="buttons">
                         <button disabled={!authUser} className="edit" onClick={editMovie}>Edit</button>

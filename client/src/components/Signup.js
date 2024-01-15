@@ -27,11 +27,11 @@ const Signup = () => {
                     alert("Email verification sent!")
                     navigate("/login")
                 }).catch((error) => {
-                    console.log("Error sending verification email: ", error);
+                    console.error("Error sending verification email: ", error);
                     setError(true);
                 })
             }).catch((error) => {
-                console.log(error)
+                console.error(error)
                 setError(true)
             })
     }
