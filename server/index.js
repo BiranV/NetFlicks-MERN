@@ -8,10 +8,7 @@ const port = process.env.PORT || 5000
 const app = express();
 
 app.use(express.json());
-
-app.use(cors({
-    // methods: 'GET,PUT,POST,DELETE',
-}));
+app.use(cors());
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
