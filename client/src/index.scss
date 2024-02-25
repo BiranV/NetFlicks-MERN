@@ -79,6 +79,15 @@ form {
     padding: 0.3rem 1.2rem;
     margin: 1rem 0;
   }
+
+  button.mode {
+    font-size: 1rem;
+    color: #fff;
+    padding: 0.3rem 1.2rem;
+    border-radius: 30px;
+    background-color: $dark;
+    margin: 1rem 0;
+  }
 }
 
 .popup {
@@ -309,15 +318,6 @@ form {
 
   p {
     font-size: small;
-  }
-
-  button {
-    font-size: 1rem;
-    color: #fff;
-    padding: 0.3rem 1.2rem;
-    border-radius: 30px;
-    background-color: $dark;
-    margin: 1rem 0;
   }
 }
 
