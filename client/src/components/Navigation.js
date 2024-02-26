@@ -1,41 +1,40 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth"
-import { auth } from "../firebase"
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 const Navigation = () => {
   const [verified, setVerified] = useState(false);
   const navigate = useNavigate();
 
-
   useEffect(() => {
-    const listen = onAuthStateChanged(auth, (user) => {
-      setVerified(user && user.emailVerified)
-    })
-    return () => listen()
-  }, [verified])
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setVerified(user && user.emailVerified);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const userSignOut = () => {
-    signOut(auth).then(() => {
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
       navigate("/login");
-    }).catch((error) => {
-      console.error(error);
-    })
-  }
-
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <header className="header">
-      <Link to='/' className="title">NetFlicks</Link>
+      <Link to="/" className="title">NetFlicks</Link>
       <div>
-        {!verified ?
-          <Link to='/login' className="btn">Login</Link>
-          :
-          <Link onClick={userSignOut} className="btn">Logout</Link>
-        }
+        {!verified ? (
+          <Link to="/login" className="btn">Login</Link>
+        ) : (
+          <button onClick={handleSignOut} className="btn">Logout</button>
+        )}
       </div>
-    </header >
-  )
-}
+    </header>
+  );
+};
 
-export default Navigation
+export default Navigation;

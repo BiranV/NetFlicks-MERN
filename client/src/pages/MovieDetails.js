@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import useFetch from "../hooks/useFetch"
-import { storage } from "../firebase"
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
-import axios from "../api/axios"
-import Snackbar from "../components/Snackbar"
-import { v4 } from "uuid"
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import useFetch from "../hooks/useFetch";
+import { storage } from "../firebase";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import axios from "../api/axios";
+import Snackbar from "../components/Snackbar";
+import { v4 as uuidv4 } from "uuid";
 
 const MovieDetails = () => {
     const navigate = useNavigate();
-    const { data, authUser } = useFetch(useParams().id);
+    const { id } = useParams();
+    const { data, authUser } = useFetch(id);
     const [imageUpload, setImageUpload] = useState(null);
-    const [editedForm, setEditedForm] = useState({})
+    const [editedForm, setEditedForm] = useState({});
     const [popupActive, setPopupActive] = useState(false);
     const [popupError, setPopupError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -20,38 +20,36 @@ const MovieDetails = () => {
         show: false,
         text: "",
     });
-    const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
-    const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
+
+    const genres = ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids'];
+    const rates = ['★', '★★', '★★★', '★★★★', '★★★★★'];
 
     const editMovie = () => {
         if (authUser.email !== data.email) {
-            setPopupError("Editing other's movie is not allowed!")
+            setPopupError("Editing other's movie is not allowed!");
         } else {
-            setEditedForm({ ...data, email: authUser.email })
-            setPopupActive(true)
+            setEditedForm({ ...data, email: authUser.email });
+            setPopupActive(true);
         }
-    }
+    };
 
     const deleteMovie = async () => {
         if (authUser.email !== data.email) {
-            setPopupError("Deleting other's movie is not allowed!")
+            setPopupError("Deleting other's movie is not allowed!");
         } else {
-            /* eslint-disable no-restricted-globals */
-            const result = confirm(`Are you sure want to delete ${ data.title } movie?`);
+            const result = window.confirm(`Are you sure you want to delete ${ data.title } movie?`);
             if (result) {
                 try {
                     const imageRef = ref(storage, data.image);
                     await deleteObject(imageRef);
-                    const res = await axios.delete(`${ data._id }`);
+                    const res = await axios.delete(data._id);
                     navigate('/');
-                    handleSnackbar(res.data.message)
-
+                    handleSnackbar(res.data.message);
                 } catch (error) {
                     console.error('Error deleting movie:', error);
                 }
             }
         }
-        /* eslint-enable no-restricted-globals */
     };
 
     const submitMovie = async (e) => {
@@ -60,36 +58,32 @@ const MovieDetails = () => {
 
         if (imageUpload) {
             const previousImageRef = ref(storage, data.image);
-
             try {
                 await deleteObject(previousImageRef);
             } catch (error) {
                 console.error('Error deleting previous image:', error);
             }
 
-            const newImageRef = ref(storage, `images/${ v4() }`);
+            const newImageRef = ref(storage, `images/${ uuidv4() }`);
             try {
                 await uploadBytes(newImageRef, imageUpload);
                 const imageUrl = await getDownloadURL(newImageRef);
                 const updatedForm = { ...editedForm, image: imageUrl };
-
                 try {
-                    const res = await axios.put(`${ editedForm._id }`, updatedForm);
-                    handleSnackbar(res.data.message)
+                    const res = await axios.put(editedForm._id, updatedForm);
+                    handleSnackbar(res.data.message);
                     setPopupActive(false);
                     navigate('/');
                 } catch (error) {
                     console.error('Error updating movie:', error);
                 }
-
             } catch (error) {
                 console.error('Error uploading new image:', error);
             }
-
         } else {
             try {
-                const res = await axios.put(`${ editedForm._id }`, editedForm);
-                handleSnackbar(res.data.message)
+                const res = await axios.put(editedForm._id, editedForm);
+                handleSnackbar(res.data.message);
                 setPopupActive(false);
                 navigate('/');
             } catch (error) {
@@ -97,8 +91,7 @@ const MovieDetails = () => {
             }
         }
         setLoading(false);
-    }
-
+    };
 
     const handleSnackbar = (val) => {
         setSnackbarActive({ show: true, text: val });
@@ -117,17 +110,17 @@ const MovieDetails = () => {
                     <h1>{data.title}</h1>
                     <address>{data.genre}</address>
                     <h3>{'★'.repeat(data.rate)}</h3>
-                    <div className="plot">{data.plot}
-                    </div>
+                    <div className="plot">{data.plot}</div>
                     <div className="buttons">
                         <button disabled={!authUser} className="edit" onClick={editMovie}>Edit</button>
                         <button disabled={!authUser} className="delete" onClick={deleteMovie}>Delete</button>
                     </div>
-                </div>}
+                </div>
+            }
             {popupActive && (
                 <div className="popup">
                     <div className="inner">
-                        <form onSubmit={submitMovie} >
+                        <form onSubmit={submitMovie}>
                             <label htmlFor='title'>Movie Title</label>
                             <input type='text' required id='title' value={editedForm.title} onChange={(e) =>
                                 setEditedForm({ ...editedForm, title: e.target.value })
@@ -163,21 +156,20 @@ const MovieDetails = () => {
                                 <button disabled={loading} type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
                             </div>
                         </form>
-                    </div >
-                </div >
-            )
-            }
+                    </div>
+                </div>
+            )}
             {popupError &&
                 <div className="popup">
                     <div className="error">
                         <h2>{popupError}</h2>
-                        <button className="sorry" onClick={(e) => setPopupError("")}>OK, Sorry</button>
-                    </div >
-                </div >
+                        <button className="sorry" onClick={() => setPopupError("")}>OK, Sorry</button>
+                    </div>
+                </div>
             }
             {snackbarActive.show && <Snackbar text={snackbarActive.text} />}
         </div>
-    )
-}
+    );
+};
 
-export default MovieDetails
+export default MovieDetails;

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import Movie from '../components/Movie'
+import Movie from '../components/Movie';
 import Snackbar from "../components/Snackbar";
-import axios from "../api/axios"
-import useFetch from "../hooks/useFetch"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { storage } from "../firebase"
-import { v4 } from "uuid"
+import axios from "../api/axios";
+import useFetch from "../hooks/useFetch";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase";
+import { v4 as uuidv4 } from "uuid";
 
 const Home = () => {
     const { authUser, data, setData } = useFetch("/");
@@ -24,17 +24,19 @@ const Home = () => {
         image: "",
         plot: "",
         email: authUser?.email
-    })
+    });
 
-    const genres = ['All', 'Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids']
-    const rates = ['★', '★★', '★★★', '★★★★', '★★★★★']
+    const genres = ['All', 'Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Thriller', 'Kids'];
+    const rates = ['★', '★★', '★★★', '★★★★', '★★★★★'];
 
     const filteredMovies = data.filter((item) => item.genre === filter || filter === '');
     const filterMovies = (e) => {
         if (e.target.value === 'All') {
-            setFilter('')
-        } else setFilter(e.target.value);
-    }
+            setFilter('');
+        } else {
+            setFilter(e.target.value);
+        }
+    };
 
     const showForm = () => {
         setForm({
@@ -46,34 +48,35 @@ const Home = () => {
             email: authUser?.email
         });
         setPopupActive(true);
-    }
+    };
 
     const submitMovie = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const imageRef = ref(storage, `images/${ v4() }`);
+        const imageRef = ref(storage, `images/${ uuidv4() }`);
         try {
-            await uploadBytes(imageRef, imageUpload)
+            await uploadBytes(imageRef, imageUpload);
             const imageUrl = await getDownloadURL(imageRef);
             const updatedForm = { ...form, image: imageUrl };
 
             try {
-                const res = await axios.post("/", updatedForm)
+                const res = await axios.post("/", updatedForm);
                 const newMovie = res.data.movie;
                 setData((prevMovies) => [newMovie, ...prevMovies]);
-                handleSnackbar(res.data.message)
+                handleSnackbar(res.data.message);
             } catch (error) {
                 console.error('Error adding movie:', error);
+                handleSnackbar("Failed to add movie");
             }
 
         } catch (error) {
-            console.error('Error adding movie:', error);
+            console.error('Error uploading image:', error);
+            handleSnackbar("Failed to upload image");
         }
         setPopupActive(false);
         setLoading(false);
-    }
-
+    };
 
     const handleSnackbar = (val) => {
         setSnackbarActive({ show: true, text: val });
@@ -94,14 +97,15 @@ const Home = () => {
                 </select>
                 <ul>
                     {filteredMovies.length > 0 && filteredMovies.map((movie) => (
-                        <Movie movie={movie} key={movie._id} />))}
+                        <Movie movie={movie} key={movie._id} />
+                    ))}
                     {filteredMovies.length <= 0 && filter !== "" && <p> There are no movies in this genre yet </p>}
-                </ul >
-            </div >
+                </ul>
+            </div>
             {popupActive && (
                 <div className="popup">
                     <div className="inner">
-                        <form onSubmit={submitMovie} >
+                        <form onSubmit={submitMovie}>
                             <label htmlFor='title'>Movie Title</label>
                             <input type='text' required id='title' value={form.title} onChange={(e) =>
                                 setForm({ ...form, title: e.target.value })
@@ -137,12 +141,12 @@ const Home = () => {
                                 <button disabled={loading} type="button" className="cancel" onClick={(e) => setPopupActive(false)} >Cancel</button>
                             </div>
                         </form>
-                    </div >
-                </div >
+                    </div>
+                </div>
             )}
             {snackbarActive.show && <Snackbar text={snackbarActive.text} />}
         </>
-    )
-}
+    );
+};
 
-export default Home
+export default Home;
