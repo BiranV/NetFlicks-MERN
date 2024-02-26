@@ -1,5 +1,11 @@
+import PropTypes from 'prop-types';
+
 const Snackbar = ({ text }) => {
   return <div className="snackbar">{text}</div>;
 }
 
-export default Snackbar
+Snackbar.propTypes = {
+  text: PropTypes.string.isRequired,
+};
+
+export default Snackbar;

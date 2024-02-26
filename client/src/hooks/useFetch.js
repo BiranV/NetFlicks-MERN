@@ -1,23 +1,27 @@
-import { useEffect, useState } from 'react'
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "../firebase"
-import axios from "../api/axios"
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+import axios from '../api/axios';
 
 const useFetch = (url) => {
     const [data, setData] = useState([]);
     const [authUser, setAuthUser] = useState(null);
 
     useEffect(() => {
+        // Function to fetch data and handle authentication state changes
         const fetchDataAndAuth = async () => {
             try {
-                const res = await axios.get(url);
-                setData(res.data);
+                // Fetch data from the specified URL
+                const response = await axios.get(url);
+                setData(response.data);
 
-                const unsubscriber = onAuthStateChanged(auth, (user) => {
+                // Listen for authentication state changes
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    // Set authenticated user if email is verified
                     setAuthUser(user && user.emailVerified ? user : null);
                 });
 
-                return () => unsubscriber();
+                return () => unsubscribe();
             } catch (error) {
                 console.error('Error fetching movies:', error);
             }
@@ -29,7 +33,7 @@ const useFetch = (url) => {
     return {
         authUser,
         data,
-        setData
+        setData,
     };
 };
 

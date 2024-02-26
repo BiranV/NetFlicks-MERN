@@ -1,7 +1,13 @@
-const Card = (props) => {
-    return (
-        <div className="card">{props.children}</div>
-    )
-}
+import PropTypes from 'prop-types';
 
-export default Card
+const Card = ({ children }) => {
+    return (
+        <div className="card">{children}</div>
+    );
+};
+
+Card.propTypes = {
+    children: PropTypes.node.isRequired,
+};
+
+export default Card;
