@@ -1,9 +1,11 @@
 const Movie = require('../models/index');
 
+// Function to handle error response
 const handleErrorResponse = (res, error) => {
     res.status(500).json({ message: error.message });
 };
 
+// Get all movies
 const getAllMovies = async (req, res) => {
     try {
         const movies = await Movie.find({}).sort({ updatedAt: -1 });
@@ -13,6 +15,7 @@ const getAllMovies = async (req, res) => {
     }
 };
 
+// Get movie by ID
 const getMovieById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -23,6 +26,7 @@ const getMovieById = async (req, res) => {
     }
 };
 
+// Create a new movie
 const createMovie = async (req, res) => {
     try {
         const movie = await Movie.create(req.body);
@@ -32,6 +36,7 @@ const createMovie = async (req, res) => {
     }
 };
 
+// Update an existing movie
 const updateMovie = async (req, res) => {
     try {
         req.body.created = Date.now();
@@ -45,6 +50,7 @@ const updateMovie = async (req, res) => {
     }
 };
 
+// Delete a movie
 const deleteMovie = async (req, res) => {
     try {
         const result = await Movie.findByIdAndDelete(req.params.id);
