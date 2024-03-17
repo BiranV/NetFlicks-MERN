@@ -6,6 +6,7 @@ import axios from '../api/axios';
 const useFetch = (url) => {
     const [data, setData] = useState([]);
     const [authUser, setAuthUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Function to fetch data and handle authentication state changes
@@ -20,10 +21,12 @@ const useFetch = (url) => {
                     // Set authenticated user if email is verified
                     setAuthUser(user && user.emailVerified ? user : null);
                 });
+                setIsLoading(false);
 
                 return () => unsubscribe();
             } catch (error) {
                 console.error('Error fetching movies:', error);
+                setIsLoading(false);
             }
         };
 
@@ -31,6 +34,7 @@ const useFetch = (url) => {
     }, [url]);
 
     return {
+        isLoading,
         authUser,
         data,
         setData,

@@ -5,12 +5,14 @@ import { storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import axios from '../api/axios';
 import Snackbar from '../components/Snackbar';
+import PageNotFound from '../components/NotFound';
 import { v4 as uuidv4 } from 'uuid';
 
 const MovieDetails = () => {
+
     const navigate = useNavigate();
     const { id } = useParams();
-    const { data, authUser } = useFetch(id);
+    const { data, authUser, isLoading } = useFetch(id);
     const [imageUpload, setImageUpload] = useState(null);
     const [editedForm, setEditedForm] = useState({});
     const [popupActive, setPopupActive] = useState(false);
@@ -100,27 +102,31 @@ const MovieDetails = () => {
         }, 2000);
     };
 
+    if (isLoading) {
+        return <p className='loading'>Loading...</p>;
+    }
+
+    if (!data._id) {
+        return <PageNotFound />;
+    }
+
     return (
         <div className="movie-details">
-            {data.length === 0 ? (
-                <p>Page Not Found</p>
-            ) : (
-                <div>
-                    <img src={data.image} alt={data.title} />
-                    <h1>{data.title}</h1>
-                    <address>{data.genre}</address>
-                    <h3>{'★'.repeat(data.rate)}</h3>
-                    <div className="plot">{data.plot}</div>
-                    <div className="buttons">
-                        <button disabled={!authUser} className="edit" onClick={editMovie}>
-                            Edit
-                        </button>
-                        <button disabled={!authUser} className="delete" onClick={deleteMovie}>
-                            Delete
-                        </button>
-                    </div>
+            <div>
+                <img src={data.image} alt={data.title} />
+                <h1>{data.title}</h1>
+                <address>{data.genre}</address>
+                <h3>{'★'.repeat(data.rate)}</h3>
+                <div className="plot">{data.plot}</div>
+                <div className="buttons">
+                    <button disabled={!authUser} className="edit" onClick={editMovie}>
+                        Edit
+                    </button>
+                    <button disabled={!authUser} className="delete" onClick={deleteMovie}>
+                        Delete
+                    </button>
                 </div>
-            )}
+            </div>
             {popupActive && (
                 <div className="popup">
                     <div className="inner">
