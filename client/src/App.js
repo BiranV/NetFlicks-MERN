@@ -38,7 +38,7 @@ function Layout() {
 }
 
 function LoadingFallback() {
-  return <h1 style={{ marginTop: '2rem' }}>Loading...</h1>;
+  return <p style={{ marginTop: '2rem' }}>Loading...</p>;
 }
 
 export default App;
