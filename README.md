@@ -1,6 +1,4 @@
-## Live project using Vercel:
-
-# https://netflicks-client.vercel.app
+## Live project using Vercel: https://netflicks-client.vercel.app
 
 ## Available Scripts
 
