@@ -3,6 +3,7 @@
 ## Available Scripts
 
 **npm i** (server + client folders)
+
 **npm start** (server folder)
 
 ![01](https://github.com/BiranV/NetFlicks/assets/59264488/68a780b5-4a5e-42c6-80a3-1958f209c677)
